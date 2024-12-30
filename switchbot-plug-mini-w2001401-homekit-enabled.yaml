@@ -1,0 +1,409 @@
+# SwitchBot Plug Mini (JP) HomeKit for ESPHome by taikun114
+
+substitutions:
+  device_name: switchbot-plug-mini
+  friendly_name: SwitchBot Plug Mini
+  fw_version: 1.0.0
+
+  # Model number
+  model: "W2001401"
+
+  # Calibration data
+  voltage_divider: "660.7973855893309"
+  current_resistor: "0.0024013086148925913"
+  current_multiply: "1.783420806116323"
+  # When calibrating, use the value shown on the power meter minus the power consumption of the
+  # Plug Mini itself (about 0.8W / 0.019A with the relay turned on) to calibrate.
+  #
+  # See the document below for calibration instructions.
+  # https://esphome.io/components/sensor/hlw8012#calibration
+
+# Configuration for ESPHome
+esphome:
+  name: ${device_name}
+  comment: Energy Monitoring Smart Plug (${model})
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  platformio_options:
+    board_build.flash_mode: dio
+  project:
+    name: SwitchBot (Customized by taikun114).Plug Mini JP HomeKit (${model})
+    version: ${fw_version}
+
+# Configuration for ESP32
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: ESP32C3
+  framework:
+    type: esp-idf
+    version: 5.2.1
+    platform_version: 6.7.0
+    sdkconfig_options:
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: y
+      CONFIG_LWIP_MAX_SOCKETS: "16"
+      CONFIG_MBEDTLS_HKDF_C: y
+
+# Configuration for external components
+external_components:
+  source: github://rednblkx/HAP-ESPHome@main
+  refresh: 0s
+
+# Configuration to read this configuration file locally
+dashboard_import:
+  package_import_url: github://taikun114/SwitchBot-Plug-Mini-for-ESPHome/switchbot-plug-mini-w2001401-homekit-enabled.yaml@v1.0.0
+  import_full_config: true
+
+# Configuration for showing logs
+logger:
+
+# Configuration for API
+api:
+
+# Configuration for OTA (Over-The-Air) updates
+ota:
+  - platform: esphome
+
+# Configuration for Wi-Fi network
+wifi:
+  # Configure the Wi-Fi network the Plug Mini will connect to
+#  ssid: !secret wifi_ssid
+#  password: !secret wifi_password
+
+  # Configure the fallback hotspot (access point mode), which is activated when
+  # Wi-Fi network is unable to connect for a certain period of time (1 minute by default)
+  ap:
+#    password: !secret ap_password # Remove comment and set a password is recommended.
+
+  # Blinking Blue LED when disconnected from Wi-Fi network
+  on_connect: # When connected to Wi-Fi network
+    - light.turn_off: blue_led
+  on_disconnect: # When disconnected from Wi-Fi network
+    - while:
+        condition:
+          not:
+            wifi.connected:
+        then:
+        - light.turn_on:
+            id: blue_led
+            brightness: 100%
+        - delay: 500ms
+        - light.turn_off: blue_led
+        - delay: 500ms
+
+# Configure a captive portal that allows users to change Wi-Fi settings
+# and update firmware on the Plug Mini when connected to a fallback hotspot
+captive_portal:
+
+# Configuration to allow Wi-Fi setup using Bluetooth LE
+# Note: Since using this component increases internal temperature,
+# it is recommended to disable (comment out) this component and configure Wi-Fi from the fallback hotspot.
+esp32_improv:
+  authorizer: none
+
+# Configuration for HomeKit Bridge
+homekit_base:
+  meta:
+    name: Plug Mini Bridge
+    manufacturer: SwitchBot
+    model: ${model}
+    fw_rev: ${fw_version}
+  setup_code: 159-35-728
+
+# Configuration for HomeKit
+homekit:
+  # Switches to add to HomeKit
+  switch:
+    # Relay switch
+    - id: relay
+      meta:
+        name: Plug
+        manufacturer: SwitchBot
+        model: ${model}
+        fw_rev: ${fw_version}
+
+# See below for more information on HomeKit configurations.
+# https://github.com/rednblkx/HAP-ESPHome#readme-ov-file
+
+# Configuration for time
+time:
+  # Synchronize time with Home Assistant through API connection
+  - platform: homeassistant
+    id: homeassistant_time
+
+# Configuration for buttons
+button:
+  # Reboot the Plug Mini
+  - platform: restart
+    name: Reboot
+    id: reboot
+
+  # Reset HomeKit pairings
+  - platform: homekit_base
+    factory_reset:
+      id: reset_homekit_pairings
+      internal: true
+
+# Configuration for binary sensors
+binary_sensor:
+  # Detects that a button on the Plug Mini unit has been pressed
+  - platform: gpio
+    id: power_button
+    pin:
+      number: GPIO02
+      inverted: true
+    internal: true
+
+    on_click: # When the button is pressed
+    # Toggle the relay switch when the button is pressed and immediately released.
+    - min_length: 50ms
+      max_length: 500ms
+      then:
+        - switch.toggle: relay
+
+    # Reboot the Plug Mini when the button is held between 3 and 10 seconds.
+    - min_length: 3s
+      max_length: 10s
+      then:
+        - button.press: reboot
+
+    on_multi_click: # When a button is pressed multiple times at specific times
+    # Reset HomeKit pairings by pressing and holding the button for at least 1 second and releasing it,
+    # and waiting at least 2 seconds before pressing and holding the button again for at least 1 second,
+    # and repeating the same procedure 3 times.
+    - timing:
+        - ON for at least 1s
+        - OFF for at least 2s
+        - ON for at least 1s
+        - OFF for at least 2s
+        - ON for at least 1s
+        - OFF for at least 2s
+      then:
+        - button.press: reset_homekit_pairings
+
+# Configuration for sensors
+sensor:
+  # Connection strength to Wi-Fi access point
+  - platform: wifi_signal
+    name: Wi-Fi Signal
+    update_interval: 30s
+
+  # Time of last power on
+  - platform: uptime
+    type: timestamp
+    name: Uptime
+
+  # Internal temperature of Plug Mini
+  - platform: internal_temperature
+    name: Internal Temperature
+    update_interval: 30s
+
+  # Power monitoring sensors
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO20
+      inverted: true
+    cf_pin: GPIO18
+    cf1_pin: GPIO19
+    current_resistor: ${current_resistor}
+    voltage_divider: ${voltage_divider}
+    power:
+      name: Power
+      unit_of_measurement: W
+      id: wattage
+      accuracy_decimals: 2 # Number of decimal points
+    current:
+      name: Current
+      unit_of_measurement: A
+      id: current
+      filters:
+        - multiply: ${current_multiply}
+    voltage:
+      name: Voltage
+      unit_of_measurement: V
+      id: voltage
+      accuracy_decimals: 2 # Number of decimal points
+    initial_mode: VOLTAGE # Initial measurement mode. VOLTAGE or CURRENT
+    change_mode_every: 1
+    # Number of measurements before switching between current and voltage measurement modes
+    # (after switching, the initial value is discarded, so the set value + 1 measurement is taken)
+
+    update_interval: 1s
+    # About sensor update intervals
+    #
+    # The power sensor is updated at the interval set by update_interval.
+    # The current sensor and voltage sensor update intervals depend on the value set in change_mode_every.
+    #
+    # If change_mode_every: 1 or more:
+    # Update every: (value set in change_mode_every + 1) * 2 * value set in update_interval (in seconds)
+    # For example, if change_mode_every: 1 and update_interval: 1s, then (1 + 1) * 2 * 1s = update every 4 seconds.
+    #
+    # If change_mode_every: “never”:
+    # The sensor in the measurement mode set in initial_mode is updated every update_interval value.
+    # Unspecified sensors will not be updated. For example, if initial_mode: VOLTAGE, the current sensor will not be updated.
+
+  # Apparent power
+  # Note: This sensor is disabled by default because the accuracy is very low due to the different timing of current and voltage measurements.
+  - platform: template
+    name: Apparent Power
+    lambda: return id(voltage).state * id(current).state;
+    device_class: apparent_power
+    unit_of_measurement: VA
+    state_class: "measurement"
+    accuracy_decimals: 2 # Number of decimal points
+    update_interval: 4s # Please match the update intervals of the current and voltage sensors
+    disabled_by_default: true
+
+  # Power factor
+  # Note: This sensor is disabled by default because the accuracy is very low due to the different timing of current and voltage measurements.
+  - platform: template
+    name: Power Factor
+    lambda: !lambda |-
+      if ((id(wattage).state / (id(voltage).state * id(current).state)) > 1) {
+        return 1; // Return 1 if it is over 1
+      } else {
+        return id(wattage).state / (id(voltage).state * id(current).state); // Return the calculated value as is if it is less than 1
+      }
+    device_class: power_factor
+    state_class: "measurement"
+    accuracy_decimals: 2 # Number of decimal points
+    update_interval: 4s # Please match the update intervals of the current and voltage sensors
+    disabled_by_default: true
+
+  # Total daily energy consumption (reset daily at 0 am)
+  - platform: total_daily_energy
+    name: Total Daily Energy
+    power_id: wattage
+    accuracy_decimals: 3 # Number of decimal points
+    filters:
+      - multiply: 0.001 # Convert unit of measurement from Wh to kWh
+    unit_of_measurement: kWh
+
+  # Total energy consumption since the Plug Mini was first set up with ESPHome
+  - platform: integration
+    name: Total Energy
+    sensor: wattage
+    time_unit: h
+    restore: true
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3 # Number of decimal points
+    filters:
+      - multiply: 0.001 # Convert unit of measurement from Wh to kWh
+    unit_of_measurement: kWh
+
+# Configuration for switches
+switch:
+  # Relay switch
+  - platform: gpio
+    name: Plug
+    pin: GPIO06
+    id: relay
+    device_class: outlet
+    restore_mode: RESTORE_DEFAULT_OFF # Relay switch state at startup of Plug Mini
+    # Available configuration:
+    #
+    # RESTORE_DEFAULT_OFF: Restore state if possible, turn off if not possible
+    # RESTORE_DEFAULT_ON: Restore state if possible, turn on if not possible
+    # RESTORE_INVERTED_DEFAULT_OFF: Restore inverted from previous state if possible, turn off if not possible
+    # RESTORE_INVERTED_DEFAULT_ON: Restore inverted from previous state if possible, turn on if not possible
+    # ALWAYS_OFF: Always turn off
+    # ALWAYS_ON: Always turn on
+
+    on_turn_on: # When the relay switch is turned on
+      - light.turn_on:
+          id: white_led
+          brightness: !lambda |-
+            if (id(led_brightness).state == "Bright") {
+              return 1; // When the brightness setting of the LED light is set to “Bright”, the White LED is turned on at 100% brightness
+            } else if (id(led_brightness).state == "Dim") {
+              return 0.5; // When the brightness setting of the LED light is set to “Dim”, the White LED is turned on at 50% brightness.
+            } else {
+              return 0; // When the brightness setting of the LED light is set to other than the above (Off), the White LED is turned on at 0% brightness (turned off)
+            }
+
+    on_turn_off: # When the relay switch is turned off
+      - light.turn_off: white_led
+
+# Configuration for select
+select:
+  # Brightness setting for built-in Plug Mini LED light
+  - platform: template
+    name: LED Brightness
+    id: led_brightness
+    icon: mdi:brightness-6
+    optimistic: true
+    options:
+      - "Bright"
+      - "Dim"
+      - "Off"
+    initial_option: "Bright"
+    restore_value: true
+    entity_category: config
+    on_value: # When the state is set
+      then:
+      - lambda: |-
+          if ( x == "Off") {
+            id(white_led).turn_off().perform(); // Turn off the White LED
+          } else if ( x == "Dim") {
+            if (id(relay).state) {
+              id(white_led).turn_on().set_brightness(0.5).perform(); // Turn on the White LED at 50% brightness only when the relay switch is on.
+            }
+          } else if ( x == "Bright") {
+            if (id(relay).state) {
+              id(white_led).turn_on().set_brightness(1.0).perform(); // Turn on the White LED at 100% brightness only when the relay switch is on.
+            }
+          }
+
+# Configuration of output
+output:
+  # White LED output
+  - platform: ledc
+    id: white_output
+    pin: GPIO07
+    inverted: true
+    frequency: 19531Hz
+
+  # Blue LED output
+  - platform: ledc
+    id: blue_output
+    pin: GPIO08
+    inverted: true
+    frequency: 19531Hz
+
+# Configuration for lights
+light:
+  # White LED light
+  - platform: monochromatic
+    output: white_output
+    name: White LED
+    id: white_led
+    icon: mdi:led-off
+    entity_category: config
+    default_transition_length: 250ms
+    restore_mode: RESTORE_DEFAULT_OFF # White LED light state at startup of Plug Mini
+    # Available configuration:
+    #
+    # RESTORE_DEFAULT_OFF: Restore state if possible, turn off if not possible
+    # RESTORE_DEFAULT_ON: Restore state if possible, turn on if not possible
+    # RESTORE_INVERTED_DEFAULT_OFF: Restore inverted from previous state if possible, turn off if not possible
+    # RESTORE_INVERTED_DEFAULT_ON: Restore inverted from previous state if possible, turn on if not possible
+    # ALWAYS_OFF: Always turn off
+    # ALWAYS_ON: Always turn on
+
+  # Blue LED light
+  - platform: monochromatic
+    output: blue_output
+    name: Blue LED
+    id: blue_led
+    icon: mdi:led-off
+    entity_category: config
+    default_transition_length: 250ms
+    restore_mode: ALWAYS_OFF # Blue LED light state at startup of Plug Mini
+    # Available configuration:
+    #
+    # RESTORE_DEFAULT_OFF: Restore state if possible, turn off if not possible
+    # RESTORE_DEFAULT_ON: Restore state if possible, turn on if not possible
+    # RESTORE_INVERTED_DEFAULT_OFF: Restore inverted from previous state if possible, turn off if not possible
+    # RESTORE_INVERTED_DEFAULT_ON: Restore inverted from previous state if possible, turn on if not possible
+    # ALWAYS_OFF: Always turn off
+    # ALWAYS_ON: Always turn on

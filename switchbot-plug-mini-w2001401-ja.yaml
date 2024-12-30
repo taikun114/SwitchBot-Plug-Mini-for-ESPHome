@@ -1,0 +1,351 @@
+# SwitchBot プラグミニ (JP) for ESPHome by taikun114
+
+substitutions:
+  device_name: switchbot-plug-mini
+  friendly_name: SwitchBot Plug Mini
+  fw_version: 1.0.0
+
+  # モデル番号
+  model: "W2001401"
+
+  # キャリブレーションデータ
+  voltage_divider: "660.7973855893309"
+  current_resistor: "0.0024013086148925913"
+  current_multiply: "1.783420806116323"
+  # キャリブレーションを行う際、電力メーターに表示される値からプラグミニ自体の消費電力（リレーをオンにした状態で約0.8W / 0.019A）を
+  # 引いた値を使ってキャリブレーションを行ってください。
+  #
+  # キャリブレーションの方法については、以下のドキュメントをご覧ください。
+  # https://esphome.io/components/sensor/hlw8012#calibration
+
+# ESPHomeに関する設定
+esphome:
+  name: ${device_name}
+  comment: 電力モニタリングスマートフラグ（${model}）
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  platformio_options:
+    board_build.flash_mode: dio
+  project:
+    name: SwitchBot (Customized by taikun114).Plug Mini JP (${model})
+    version: ${fw_version}
+
+# ESP32に関する設定
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: ESP32C3
+  framework:
+    type: esp-idf
+
+# この設定ファイルをローカルに読み込むための設定
+dashboard_import:
+  package_import_url: github://taikun114/SwitchBot-Plug-Mini-for-ESPHome/switchbot-plug-mini-w2001401-ja.yaml@v1.0.0
+  import_full_config: true
+
+# ログを表示するための設定
+logger:
+
+# APIに関する設定
+api:
+
+# OTA（Over-The-Air）アップデートに関する設定
+ota:
+  - platform: esphome
+
+# Wi-Fiネットワークに関する設定
+wifi:
+  # プラグミニが接続するWi-Fiネットワークの設定
+#  ssid: !secret wifi_ssid
+#  password: !secret wifi_password
+
+  # 一定の期間（デフォルトでは1分）Wi-Fiネットワークに接続できなかった場合に
+  # 有効になるフォールバックホットスポット（アクセスポイントモード）の設定
+  ap:
+#    password: !secret ap_password # コメントを外して、パスワードを設定することをおすすめします。
+
+  # Wi-Fiネットワークから切断されている時に、青色LEDを点滅させる
+  on_connect: # Wi-Fiネットワークに接続された時
+    - light.turn_off: blue_led
+  on_disconnect: # Wi-Fiネットワークから切断された時
+    - while:
+        condition:
+          not:
+            wifi.connected:
+        then:
+        - light.turn_on:
+            id: blue_led
+            brightness: 100%
+        - delay: 500ms
+        - light.turn_off: blue_led
+        - delay: 500ms
+
+# フォールバックホットスポットに接続したときに、プラグミニのWi-Fi設定の変更や
+# ファームウェアの更新を行えるようにするキャプティブポータルの設定
+captive_portal:
+
+# Bluetooth LEを使ってWi-Fiをセットアップできるようにする設定
+# 注意: このコンポーネントを使用していると内部温度が上昇するため、
+# このコンポーネントを無効化（コメントアウト）し、フォールバックホットスポットからWi-Fiを設定することをおすすめします。
+esp32_improv:
+  authorizer: none
+
+# 時間に関する設定
+time:
+  # API接続を通して、Home Assistantと時間を同期する
+  - platform: homeassistant
+    id: homeassistant_time
+
+# ボタンに関する設定
+button:
+  # プラグミニを再起動する
+  - platform: restart
+    name: Reboot
+    id: reboot
+
+# バイナリセンサーに関する設定
+binary_sensor:
+  # プラグミニ本体のボタンが押されたことを検知
+  - platform: gpio
+    id: power_button
+    pin:
+      number: GPIO02
+      inverted: true
+    internal: true
+
+    on_click: # ボタンを押したとき
+    # ボタンを押してすぐ離した時にリレースイッチを切り替える
+    - min_length: 50ms
+      max_length: 500ms
+      then:
+        - switch.toggle: relay
+
+    # ボタンを3秒以上10秒以下の範囲で長押しした時にプラグミニを再起動する
+    - min_length: 3s
+      max_length: 10s
+      then:
+        - button.press: reboot
+
+# センサーに関する設定
+sensor:
+  # Wi-Fiアクセスポイントへの接続強度
+  - platform: wifi_signal
+    name: Wi-Fi Signal
+    update_interval: 30s
+
+  # 最後に電源を入れた時刻
+  - platform: uptime
+    type: timestamp
+    name: Uptime
+
+  # プラグミニの内部温度
+  - platform: internal_temperature
+    name: Internal Temperature
+    update_interval: 30s
+
+  # 電力モニタリングセンサー
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO20
+      inverted: true
+    cf_pin: GPIO18
+    cf1_pin: GPIO19
+    current_resistor: ${current_resistor}
+    voltage_divider: ${voltage_divider}
+    power: # 電力
+      name: Power
+      unit_of_measurement: W
+      id: wattage
+      accuracy_decimals: 2 # 小数点以下の数
+    current: # 電流
+      name: Current
+      unit_of_measurement: A
+      id: current
+      filters:
+        - multiply: ${current_multiply}
+    voltage: # 電圧
+      name: Voltage
+      unit_of_measurement: V
+      id: voltage
+      accuracy_decimals: 2 # 小数点以下の数
+    initial_mode: VOLTAGE # 初期の測定モード。電圧(VOLTAGE)または電流(CURRENT)
+    change_mode_every: 1 # 電流と電圧の測定モードを切り替えるまでの測定回数（切り替え後、初回の値は破棄されるため、設定値 + 1回測定されます）
+    update_interval: 1s # センサーの更新間隔
+    # センサーの更新間隔について
+    #
+    # 電力センサーの更新間隔は update_interval で設定した間隔で更新されます。
+    # 電流センサーと電圧センサーの更新間隔は change_mode_every の設定値によって異なります。
+    #
+    # change_mode_every: 1 以上の場合:
+    # (change_mode_everyの設定値 + 1) * 2 * update_intervalの設定値(秒換算) ごとに更新
+    # 例えば change_mode_every: 1 で update_interval: 1s の場合、(1 + 1) * 2 * 1s = 4秒ごとに更新されることになります。
+    #
+    # change_mode_every: "never" の場合:
+    # initial_mode で設定した測定モードのセンサーが update_intervalの設定値 ごとに更新
+    # 指定されていないセンサーは更新されません。例えば initial_mode: VOLTAGE の場合、電流センサーは更新されません。
+
+  # 皮相電力
+  # 注意: 電流と電圧の測定タイミングが異なることから精度が非常に低いため、このセンサーはデフォルトで無効化されています。
+  - platform: template
+    name: Apparent Power
+    lambda: return id(voltage).state * id(current).state;
+    device_class: apparent_power
+    unit_of_measurement: VA
+    state_class: "measurement"
+    accuracy_decimals: 2 # 小数点以下の数
+    update_interval: 4s # 電流センサーと電圧センサーの更新間隔に合わせてください
+    disabled_by_default: true
+
+  # 力率
+  # 注意: 電流と電圧の測定タイミングが異なることから精度が非常に低いため、このセンサーはデフォルトで無効化されています。
+  - platform: template
+    name: Power Factor
+    lambda: !lambda |-
+      if ((id(wattage).state / (id(voltage).state * id(current).state)) > 1) {
+        return 1; // 1を超えた時は1を返す
+      } else {
+        return id(wattage).state / (id(voltage).state * id(current).state); // 1より少ない時はそのままの計算値を返す
+      }
+    device_class: power_factor
+    state_class: "measurement"
+    accuracy_decimals: 2 # 小数点以下の数
+    update_interval: 4s # 電流センサーと電圧センサーの更新間隔に合わせてください
+    disabled_by_default: true
+
+  # 一日の累計消費電力量（毎日午前0時にリセットされます）
+  - platform: total_daily_energy
+    name: Total Daily Energy
+    power_id: wattage
+    accuracy_decimals: 3 # 小数点以下の数
+    filters:
+      - multiply: 0.001 # 測定単位を Wh から kWh に変換
+    unit_of_measurement: kWh
+
+  # プラグミニを初めてESPHomeで設定してからの累計消費電力量
+  - platform: integration
+    name: Total Energy
+    sensor: wattage
+    time_unit: h
+    restore: true
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3 # 小数点以下の数
+    filters:
+      - multiply: 0.001 # 測定単位を Wh から kWh に変換
+    unit_of_measurement: kWh
+
+# スイッチに関する設定
+switch:
+  # リレースイッチ
+  - platform: gpio
+    name: Plug
+    pin: GPIO06
+    id: relay
+    device_class: outlet
+    restore_mode: RESTORE_DEFAULT_OFF # プラグミニ起動時のリレースイッチ状態
+    # 可能な設定:
+    #
+    # RESTORE_DEFAULT_OFF: 可能な場合は状態を復元し、不可能な場合はオフにする
+    # RESTORE_DEFAULT_ON: 可能な場合は状態を復元し、不可能な場合はオンにする
+    # RESTORE_INVERTED_DEFAULT_OFF: 可能な場合は以前の状態とは反転して復元し、不可能な場合はオフにする
+    # RESTORE_INVERTED_DEFAULT_ON: 可能な場合は以前の状態とは反転して復元し、不可能な場合はオンにする
+    # ALWAYS_OFF: 常にオフにする
+    # ALWAYS_ON: 常にオンにする
+
+    on_turn_on: # リレースイッチをオンにした時
+      - light.turn_on:
+          id: white_led
+          brightness: !lambda |-
+            if (id(led_brightness).state == "明るい") {
+              return 1; // LEDライトの明るさ設定が「明るい」に設定されているときは、白色LEDを100%の明るさで点灯させる
+            } else if (id(led_brightness).state == "暗い") {
+              return 0.5; // LEDライトの明るさ設定が「暗い」に設定されているときは、白色LEDを50%の明るさで点灯させる
+            } else {
+              return 0; // LEDライトの明るさ設定が上記以外（オフ）に設定されているときは、白色LEDを0%の明るさで点灯させる（消灯させる）
+            }
+
+    on_turn_off: # リレースイッチをオフにした時
+      - light.turn_off: white_led
+
+# 選択に関する設定
+select:
+  # プラグミニ内蔵LEDライトの明るさ設定
+  - platform: template
+    name: LED Brightness
+    id: led_brightness
+    icon: mdi:brightness-6
+    optimistic: true
+    options:
+      - "明るい"
+      - "暗い"
+      - "オフ"
+    initial_option: "明るい"
+    restore_value: true
+    entity_category: config
+    on_value: # 状態が設定された時
+      then:
+      - lambda: |-
+          if ( x == "オフ") {
+            id(white_led).turn_off().perform(); // 白色LEDを消灯させる
+          } else if ( x == "暗い") {
+            if (id(relay).state) {
+              id(white_led).turn_on().set_brightness(0.5).perform(); // リレースイッチがオンの時のみ、白色LEDを50%の明るさで点灯させる
+            }
+          } else if ( x == "明るい") {
+            if (id(relay).state) {
+              id(white_led).turn_on().set_brightness(1.0).perform(); // リレースイッチがオンの時のみ、白色LEDを100%の明るさで点灯させる
+            }
+          }
+
+# 出力に関する設定
+output:
+  # 白色LED出力
+  - platform: ledc
+    id: white_output
+    pin: GPIO07
+    inverted: true
+    frequency: 19531Hz
+
+  # 青色LED出力
+  - platform: ledc
+    id: blue_output
+    pin: GPIO08
+    inverted: true
+    frequency: 19531Hz
+
+# ライトに関する設定
+light:
+  # 白色LEDライト
+  - platform: monochromatic
+    output: white_output
+    name: White LED
+    id: white_led
+    icon: mdi:led-off
+    entity_category: config
+    default_transition_length: 250ms
+    restore_mode: RESTORE_DEFAULT_OFF # プラグミニ起動時の白色LEDライト状態
+    # 可能な設定:
+    #
+    # RESTORE_DEFAULT_OFF: 可能な場合は状態を復元し、不可能な場合はオフにする
+    # RESTORE_DEFAULT_ON: 可能な場合は状態を復元し、不可能な場合はオンにする
+    # RESTORE_INVERTED_DEFAULT_OFF: 可能な場合は以前の状態とは反転して復元し、不可能な場合はオフにする
+    # RESTORE_INVERTED_DEFAULT_ON: 可能な場合は以前の状態とは反転して復元し、不可能な場合はオンにする
+    # ALWAYS_OFF: 常にオフにする
+    # ALWAYS_ON: 常にオンにする
+
+  # 青色LEDライト
+  - platform: monochromatic
+    output: blue_output
+    name: Blue LED
+    id: blue_led
+    icon: mdi:led-off
+    entity_category: config
+    default_transition_length: 250ms
+    restore_mode: ALWAYS_OFF # プラグミニ起動時の青色LEDライト状態
+    # 可能な設定:
+    #
+    # RESTORE_DEFAULT_OFF: 可能な場合は状態を復元し、不可能な場合はオフにする
+    # RESTORE_DEFAULT_ON: 可能な場合は状態を復元し、不可能な場合はオンにする
+    # RESTORE_INVERTED_DEFAULT_OFF: 可能な場合は以前の状態とは反転して復元し、不可能な場合はオフにする
+    # RESTORE_INVERTED_DEFAULT_ON: 可能な場合は以前の状態とは反転して復元し、不可能な場合はオンにする
+    # ALWAYS_OFF: 常にオフにする
+    # ALWAYS_ON: 常にオンにする
