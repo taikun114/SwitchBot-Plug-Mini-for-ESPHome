@@ -1,4 +1,4 @@
-# SwitchBot Plug Mini (JP) HomeKit for ESPHome by taikun114
+# SwitchBot Plug Mini (JP) for ESPHome by taikun114
 
 substitutions:
   device_name: switchbot-plug-mini
