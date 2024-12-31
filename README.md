@@ -88,6 +88,9 @@ Depending on the functions and languages, several firmware versions are availabl
     - **switchbot-plug-mini-w2001401-homekit-enabled-vX.X.X-ja.bin**
       - In addition to the basic functions, this firmware file adds HomeKit functions using “[**HAP-ESPHome**](https://github.com/rednblkx/HAP-ESPHome)".
 
+Change logs can be found [**here**](CHANGELOG.md).
+
+
 > [!NOTE]
 > [**There is a report that there is almost no difference between US models W1901400 and W1901401 except in software**](https://github.com/kendallgoto/switchbota/issues/19), so it is highly likely that the JP models W2001400 and W2001401 are also similar and it is likely that the same firmware / configuration files may can be used for the W2001400 and W2001401.
 

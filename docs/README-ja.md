@@ -89,6 +89,9 @@
     - **switchbot-plug-mini-w2001401-homekit-enabled-vX.X.X-ja.bin**
       - 基本的な機能に加え、「[**HAP-ESPHome**](https://github.com/rednblkx/HAP-ESPHome)」を使ってHomeKitの機能を追加したファームウェアファイルです。
 
+変更ログは[**こちら**](CHANGELOG-ja.md)をご覧ください。
+
+
 > [!NOTE]
 > [**USモデルのW1901400とW1901401ではソフトウェア面以外での違いはほとんどないとの報告**](https://github.com/kendallgoto/switchbota/issues/19)がありますので、JPモデルのW2001400とW2001401も同様の可能性が高く、W2001400とW2001401は同じファームウェア / 設定ファイルが使用できる可能性があります。
 
