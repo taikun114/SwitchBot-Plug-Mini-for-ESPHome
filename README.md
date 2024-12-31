@@ -217,7 +217,6 @@ wifi_password: "Enter your network password here"
 
 # Password to connect when ESP devices is running in fallback hotspot mode
 ap_password: "Enter the password to connect to the fallback hotspot here"
-
 ```
 
 
