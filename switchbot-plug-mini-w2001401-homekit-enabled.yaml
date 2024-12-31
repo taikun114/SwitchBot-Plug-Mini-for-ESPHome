@@ -227,7 +227,7 @@ sensor:
     # Number of measurements before switching between current and voltage measurement modes
     # (after switching, the initial value is discarded, so the set value + 1 measurement is taken)
 
-    update_interval: 1s
+    update_interval: 5s
     # About sensor update intervals
     #
     # The power sensor is updated at the interval set by update_interval.
@@ -250,7 +250,7 @@ sensor:
     unit_of_measurement: VA
     state_class: "measurement"
     accuracy_decimals: 2 # Number of decimal points
-    update_interval: 4s # Please match the update intervals of the current and voltage sensors
+    update_interval: 20s # Please match the update intervals of the current and voltage sensors
     disabled_by_default: true
 
   # Power factor
@@ -266,7 +266,7 @@ sensor:
     device_class: power_factor
     state_class: "measurement"
     accuracy_decimals: 2 # Number of decimal points
-    update_interval: 4s # Please match the update intervals of the current and voltage sensors
+    update_interval: 20s # Please match the update intervals of the current and voltage sensors
     disabled_by_default: true
 
   # Total daily energy consumption (reset daily at 0 am)

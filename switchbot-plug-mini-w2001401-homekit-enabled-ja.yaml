@@ -223,7 +223,7 @@ sensor:
       accuracy_decimals: 2 # 小数点以下の数
     initial_mode: VOLTAGE # 初期の測定モード。電圧(VOLTAGE)または電流(CURRENT)
     change_mode_every: 1 # 電流と電圧の測定モードを切り替えるまでの測定回数（切り替え後、初回の値は破棄されるため、設定値 + 1回測定されます）
-    update_interval: 1s # センサーの更新間隔
+    update_interval: 5s # センサーの更新間隔
     # センサーの更新間隔について
     #
     # 電力センサーの更新間隔は update_interval で設定した間隔で更新されます。
@@ -246,7 +246,7 @@ sensor:
     unit_of_measurement: VA
     state_class: "measurement"
     accuracy_decimals: 2 # 小数点以下の数
-    update_interval: 4s # 電流センサーと電圧センサーの更新間隔に合わせてください
+    update_interval: 20s # 電流センサーと電圧センサーの更新間隔に合わせてください
     disabled_by_default: true
 
   # 力率
@@ -262,7 +262,7 @@ sensor:
     device_class: power_factor
     state_class: "measurement"
     accuracy_decimals: 2 # 小数点以下の数
-    update_interval: 4s # 電流センサーと電圧センサーの更新間隔に合わせてください
+    update_interval: 20s # 電流センサーと電圧センサーの更新間隔に合わせてください
     disabled_by_default: true
 
   # 一日の累計消費電力量（毎日午前0時にリセットされます）
