@@ -3,7 +3,7 @@
 substitutions:
   device_name: switchbot-plug-mini
   friendly_name: SwitchBot Plug Mini
-  fw_version: 1.0.0
+  fw_version: 1.0.1
 
   # Model number
   model: "W2001401"
@@ -39,7 +39,7 @@ esp32:
 
 # Configuration to read this configuration file locally
 dashboard_import:
-  package_import_url: github://taikun114/SwitchBot-Plug-Mini-for-ESPHome/switchbot-plug-mini-w2001401.yaml@v1.0.0
+  package_import_url: github://taikun114/SwitchBot-Plug-Mini-for-ESPHome/switchbot-plug-mini-w2001401.yaml@v1.0.1
   import_full_config: true
 
 # Configuration for showing logs
