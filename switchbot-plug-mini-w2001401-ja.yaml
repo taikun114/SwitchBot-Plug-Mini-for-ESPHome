@@ -155,7 +155,7 @@ sensor:
       name: Power
       unit_of_measurement: W
       id: wattage
-      accuracy_decimals: 2 # 小数点以下の数
+      accuracy_decimals: 1 # 小数点以下の数
     current: # 電流
       name: Current
       unit_of_measurement: A

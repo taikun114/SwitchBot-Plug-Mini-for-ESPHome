@@ -155,7 +155,7 @@ sensor:
       name: Power
       unit_of_measurement: W
       id: wattage
-      accuracy_decimals: 2 # Number of decimal points
+      accuracy_decimals: 1 # Number of decimal points
     current:
       name: Current
       unit_of_measurement: A
