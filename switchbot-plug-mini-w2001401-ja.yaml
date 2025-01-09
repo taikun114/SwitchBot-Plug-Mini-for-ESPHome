@@ -220,6 +220,20 @@ sensor:
       - multiply: 0.001 # 測定単位を Wh から kWh に変換
     unit_of_measurement: kWh
 
+  # 一ヵ月の累計消費電力量（毎月1日午前0時にリセットされます）
+  - platform: integration
+    name: Total Monthly Energy
+    id: total_monthly_energy
+    sensor: wattage
+    time_unit: h
+    restore: true
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3 # 小数点以下の数
+    filters:
+      - multiply: 0.001 # 測定単位を Wh から kWh に変換
+    unit_of_measurement: kWh
+
   # プラグミニを初めてESPHomeで設定してからの累計消費電力量
   - platform: integration
     name: Total Energy

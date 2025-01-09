@@ -278,6 +278,20 @@ sensor:
       - multiply: 0.001 # Convert unit of measurement from Wh to kWh
     unit_of_measurement: kWh
 
+  # Total monthly energy consumption (reset monthly at 0 am on the first day of every month)
+  - platform: integration
+    name: Total Monthly Energy
+    id: total_monthly_energy
+    sensor: wattage
+    time_unit: h
+    restore: true
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3 # Number of decimal points
+    filters:
+      - multiply: 0.001 # Convert unit of measurement from Wh to kWh
+    unit_of_measurement: kWh
+
   # Total energy consumption since the Plug Mini was first set up with ESPHome
   - platform: integration
     name: Total Energy
