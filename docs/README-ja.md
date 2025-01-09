@@ -378,23 +378,24 @@ Home AssistantのデフォルトエンティティIDは、ESPHomeの`friendly_na
 
 名前の日本語訳は以下の通りです（Home Assistantのデバイス設定画面に表示される順番に並んでいます）。
 
-| 英語名                | 日本語名           |
-|----------------------|-------------------|
-| Plug                 | プラグ             |
-| Apparent Power       | 皮相電力           |
-| Current              | 電流              |
-| Power                | 電力              |
-| Power Factor         | 力率              |
-| Total Daily Energy   | 今日の累計消費電力量 |
-| Total Energy         | 累計消費電力量      |
-| Voltage              | 電圧              |
-| Blue LED             | 青色LED           |
-| LED Brightness       | LEDの明るさ        |
-| Reboot               | 再起動             |
-| White LED            | 白色LED           |
-| Internal Temperature | 内部温度           |
-| Uptime               | アップタイム        |
-| Wi-Fi Signal         | Wi-Fiシグナル      |
+| 英語名                | 日本語名            |
+|----------------------|--------------------|
+| Plug                 | プラグ              |
+| Apparent Power       | 皮相電力            |
+| Current              | 電流               |
+| Power                | 電力               |
+| Power Factor         | 力率               |
+| Total Daily Energy   | 一日の累計消費電力量  |
+| Total Energy         | 累計消費電力量       |
+| Total Monthly Energy | 一ヵ月の累計消費電力量 |
+| Voltage              | 電圧               |
+| Blue LED             | 青色LED            |
+| LED Brightness       | LEDの明るさ         |
+| Reboot               | 再起動              |
+| White LED            | 白色LED            |
+| Internal Temperature | 内部温度            |
+| Uptime               | アップタイム         |
+| Wi-Fi Signal         | Wi-Fiシグナル       |
 
 もちろん、これらの翻訳はあくまで一例ですので、お好きなようにカスタマイズしていただいて構いません。
 
