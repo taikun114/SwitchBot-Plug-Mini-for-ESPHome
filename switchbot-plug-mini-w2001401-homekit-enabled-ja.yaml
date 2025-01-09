@@ -130,6 +130,15 @@ time:
   - platform: homeassistant
     id: homeassistant_time
 
+    on_time: # 特定の時間になった時
+      # 毎月1日午前0時に、一ヵ月の累計消費電力量センサーをリセットする
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        days_of_month: 1
+        then:
+          - sensor.integration.reset: total_monthly_energy
+
 # ボタンに関する設定
 button:
   # プラグミニを再起動する

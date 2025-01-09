@@ -95,6 +95,15 @@ time:
   - platform: homeassistant
     id: homeassistant_time
 
+    on_time: # When a specific time came
+      # Reset the total monthly energy sensor at 0 am on the first day of every month
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        days_of_month: 1
+        then:
+          - sensor.integration.reset: total_monthly_energy
+
 # Configuration for buttons
 button:
   # Reboot the Plug Mini
