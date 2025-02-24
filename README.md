@@ -100,7 +100,12 @@ You will need to first replace the firmware with Tasmota firmware using "[**Swit
 
 Please refer to [**README in SwitchbOTA**](https://github.com/kendallgoto/switchbota#readme-ov-file) for the firmware replacement procedure.
 
-Once the Tasmota firmware installation is complete and Wi-Fi is configured, proceed to the next step (do not upgrade to the latest version of Tasmota).
+Once the Tasmota firmware installation is complete and Wi-Fi is configured, proceed to the next step.
+
+> [!WARNING]
+> **Please do not try to upgrade** Tasmota to v12 or any later version. The new partition layout introduced in Tasmota v12 is not compatible with ESPHome and you will not be able to install the ESPHome firmware.
+>
+> Also, to revert to Tasmota v11 or earlier, you will need to disassemble the unit and perform a serial flash, so it is strongly recommended that you do not change the version of Tasmota installed by SwitchbOTA.
 
 
 ### Step 2. Install ESPHome firmware
