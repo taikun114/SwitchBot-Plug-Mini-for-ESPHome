@@ -283,7 +283,7 @@ switch:
             } else if (id(led_brightness).state == "暗い") {
               return 0.5; // LEDライトの明るさ設定が「暗い」に設定されているときは、白色LEDを50%の明るさで点灯させる
             } else {
-              return 0; // LEDライトの明るさ設定が上記以外（オフ）に設定されているときは、白色LEDを0%の明るさで点灯させる（消灯させる）
+              return 0; // LEDライトの明るさ設定が上記以外（LEDオフ）に設定されているときは、白色LEDを0%の明るさで点灯させる（消灯させる）
             }
 
     on_turn_off: # リレースイッチをオフにした時
@@ -298,16 +298,16 @@ select:
     icon: mdi:brightness-6
     optimistic: true
     options:
-      - "明るい"
-      - "暗い"
-      - "オフ"
-    initial_option: "明るい"
+      - 明るい
+      - 暗い
+      - LEDオフ
+    initial_option: 明るい
     restore_value: true
     entity_category: config
     on_value: # 状態が設定された時
       then:
       - lambda: |-
-          if ( x == "オフ") {
+          if ( x == "LEDオフ") {
             id(white_led).turn_off().perform(); // 白色LEDを消灯させる
           } else if ( x == "暗い") {
             if (id(relay).state) {

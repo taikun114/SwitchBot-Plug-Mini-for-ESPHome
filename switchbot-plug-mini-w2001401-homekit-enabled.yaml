@@ -339,7 +339,7 @@ switch:
             } else if (id(led_brightness).state == "Dim") {
               return 0.5; // When the brightness setting of the LED light is set to “Dim”, the White LED is turned on at 50% brightness.
             } else {
-              return 0; // When the brightness setting of the LED light is set to other than the above (Off), the White LED is turned on at 0% brightness (turned off)
+              return 0; // When the brightness setting of the LED light is set to other than the above (LED Off), the White LED is turned on at 0% brightness (turned off)
             }
 
     on_turn_off: # When the relay switch is turned off
@@ -354,16 +354,16 @@ select:
     icon: mdi:brightness-6
     optimistic: true
     options:
-      - "Bright"
-      - "Dim"
-      - "Off"
-    initial_option: "Bright"
+      - Bright
+      - Dim
+      - LED Off
+    initial_option: Bright
     restore_value: true
     entity_category: config
     on_value: # When the state is set
       then:
       - lambda: |-
-          if ( x == "Off") {
+          if ( x == "LED Off") {
             id(white_led).turn_off().perform(); // Turn off the White LED
           } else if ( x == "Dim") {
             if (id(relay).state) {
