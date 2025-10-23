@@ -1,6 +1,12 @@
 # SwitchBot Plug Mini for ESPHome Changelog
 **English** | [日本語](docs/CHANGELOG-ja.md)
 
+## 1.2.0
+- Change the `Off` (or `オフ`) option name for `LED Brightness` to `LED Off` (or `LEDオフ`)
+  - **This is a breaking change.**\
+    If you have automations detecting or toggling `Off` (or `オフ`), you will need to update them to `LED Off` (or `LEDオフ`) when updating the firmware.
+  - This change may resolve an issue ([**#4**](https://github.com/taikun114/SwitchBot-Plug-Mini-for-ESPHome/issues/4)) where validation failed when taking control in ESPHome after initial installation.
+
 ## 1.1.1
 - Removes specification of ESP32 framework version and platform version from HomeKit firmware
 
