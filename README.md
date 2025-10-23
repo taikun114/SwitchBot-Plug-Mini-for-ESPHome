@@ -329,7 +329,7 @@ LED off: Relay switch is **off**.
 LED on: Relay switch is **on**.
 
 > [!NOTE]
-> If `LED Brightness` is set to `Off` or `オフ`, the LED will be off regardless of the state of the relay switch.
+> If `LED Brightness` is set to `LED Off` or `LEDオフ`, the LED will be off regardless of the state of the relay switch.
 
 
 #### Blue LED light
