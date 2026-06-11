@@ -330,9 +330,9 @@ switch:
       - light.turn_on:
           id: white_led
           brightness: !lambda |-
-            if (id(led_brightness).state == "明るい") {
+            if (id(led_brightness).current_option() == "明るい") {
               return 1; // LEDライトの明るさ設定が「明るい」に設定されているときは、白色LEDを100%の明るさで点灯させる
-            } else if (id(led_brightness).state == "暗い") {
+            } else if (id(led_brightness).current_option() == "暗い") {
               return 0.5; // LEDライトの明るさ設定が「暗い」に設定されているときは、白色LEDを50%の明るさで点灯させる
             } else {
               return 0; // LEDライトの明るさ設定が上記以外（LEDオフ）に設定されているときは、白色LEDを0%の明るさで点灯させる（消灯させる）

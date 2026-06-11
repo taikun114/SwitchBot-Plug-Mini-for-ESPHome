@@ -334,9 +334,9 @@ switch:
       - light.turn_on:
           id: white_led
           brightness: !lambda |-
-            if (id(led_brightness).state == "Bright") {
+            if (id(led_brightness).current_option() == "Bright") {
               return 1; // When the brightness setting of the LED light is set to “Bright”, the White LED is turned on at 100% brightness
-            } else if (id(led_brightness).state == "Dim") {
+            } else if (id(led_brightness).current_option() == "Dim") {
               return 0.5; // When the brightness setting of the LED light is set to “Dim”, the White LED is turned on at 50% brightness.
             } else {
               return 0; // When the brightness setting of the LED light is set to other than the above (LED Off), the White LED is turned on at 0% brightness (turned off)
