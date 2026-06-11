@@ -1,6 +1,9 @@
 # SwitchBot Plug Mini for ESPHome Changelog
 **English** | [日本語](docs/CHANGELOG-ja.md)
 
+## 1.2.1
+- Fix deprecation warning regarding `state` in `white_led` lambda by @mjoshd ([**#6**](https://github.com/taikun114/SwitchBot-Plug-Mini-for-ESPHome/pull/6))
+
 ## 1.2.0
 - Change the `Off` (or `オフ`) option name for `LED Brightness` to `LED Off` (or `LEDオフ`)
   - **This is a breaking change.**\

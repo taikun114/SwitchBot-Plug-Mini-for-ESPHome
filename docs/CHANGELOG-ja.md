@@ -1,6 +1,9 @@
 # SwitchBot プラグミニ for ESPHome 変更ログ
 [English](/CHANGELOG.md) | **日本語**
 
+## 1.2.1
+- `white_led`ラムダの`state`に関する非推奨警告を修正 by @mjoshd （[**#6**](https://github.com/taikun114/SwitchBot-Plug-Mini-for-ESPHome/pull/6)）
+
 ## 1.2.0
 - `LED Brightness`（LEDの明るさ）の`オフ`（または`Off`）オプション名を`LEDオフ`（または`LED Off`）に変更
   - **これは破壊的変更です。**\
