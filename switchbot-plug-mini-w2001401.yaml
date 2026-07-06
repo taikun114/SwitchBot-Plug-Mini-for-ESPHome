@@ -9,9 +9,8 @@ substitutions:
   model: "W2001401"
 
   # Calibration data
-  voltage_divider: "660.7973855893309"
-  current_resistor: "0.0024013086148925913"
-  current_multiply: "1.783420806116323"
+  voltage_divider: "1467"
+
   # When calibrating, use the value shown on the power meter minus the power consumption of the
   # Plug Mini itself (about 0.8W / 0.019A with the relay turned on) to calibrate.
   #
@@ -153,13 +152,14 @@ sensor:
 
   # Power monitoring sensors
   - platform: hlw8012
+    model: BL0937  #Switchbot Minis NEED this in here or you get wildly wrong numbers. Example conf: https://digiblur.com/wiki/devices/plugs/switchbot_15_amp_w1901400/
     sel_pin:
       number: GPIO20
       inverted: true
     cf_pin: GPIO18
     cf1_pin: GPIO19
     current_resistor: ${current_resistor}
-    voltage_divider: ${voltage_divider}
+#    voltage_divider: ${voltage_divider}
     power:
       name: Power
       unit_of_measurement: W
@@ -170,7 +170,7 @@ sensor:
       unit_of_measurement: A
       id: current
       filters:
-        - multiply: ${current_multiply}
+#        - multiply: ${current_multiply}
     voltage:
       name: Voltage
       unit_of_measurement: V
